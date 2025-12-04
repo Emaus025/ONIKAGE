@@ -5,6 +5,10 @@ using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
+    [Header("Sistemas Adicionales")]
+    public CombatManager combatSystem;
+    public InteractionSystem interactionSystem;
+
     public float moveSpeed = 3;
 
     private bool isMoving;
@@ -22,6 +26,9 @@ public class PlayerController : MonoBehaviour
         {
             Debug.LogWarning("PlayerController: no Animator component found on the player GameObject.");
         }
+
+        combatSystem = GetComponent<CombatManager>();
+        interactionSystem = GetComponent<InteractionSystem>();
     }
 
     public void Update()

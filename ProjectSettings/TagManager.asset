@@ -44,11 +44,26 @@ TagManager:
   - name: Background
     uniqueID: 3312748993
     locked: 0
-  - name: Foreground
-    uniqueID: 1438834881
+  - name: Floor
+    uniqueID: 2060647295
+    locked: 0
+  - name: SolidObjects
+    uniqueID: 196162463
+    locked: 0
+  - name: Door
+    uniqueID: 4193147579
     locked: 0
   - name: Player
     uniqueID: 1600547
+    locked: 0
+  - name: cabins
+    uniqueID: 254731593
+    locked: 0
+  - name: trees
+    uniqueID: 4283893249
+    locked: 0
+  - name: rocks
+    uniqueID: 1433278915
     locked: 0
   m_RenderingLayers:
   - Default

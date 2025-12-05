@@ -3,7 +3,15 @@
   "WorkspaceRootPath": "C:\\Users\\maria\\source\\repos\\ejemplo1\\ONIKAGE\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{E5F4C84E-9779-DD15-A896-C55A4FA7AB46}|Assembly-CSharp.csproj|c:\\users\\maria\\source\\repos\\ejemplo1\\onikage\\assets\\scripts\\playercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{E5F4C84E-9779-DD15-A896-C55A4FA7AB46}|Assembly-CSharp.csproj|c:\\users\\maria\\source\\repos\\ejemplo1\\onikage\\assets\\scripts\\traumashadow.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E5F4C84E-9779-DD15-A896-C55A4FA7AB46}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\traumashadow.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E5F4C84E-9779-DD15-A896-C55A4FA7AB46}|Assembly-CSharp.csproj|c:\\users\\maria\\source\\repos\\ejemplo1\\onikage\\assets\\scripts\\floatingtext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E5F4C84E-9779-DD15-A896-C55A4FA7AB46}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\floatingtext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E5F4C84E-9779-DD15-A896-C55A4FA7AB46}|Assembly-CSharp.csproj|C:\\Users\\maria\\source\\repos\\ejemplo1\\ONIKAGE\\assets\\scripts\\playercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{E5F4C84E-9779-DD15-A896-C55A4FA7AB46}|Assembly-CSharp.csproj|solutionrelative:assets\\scripts\\playercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -54,11 +62,37 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 0,
+              "Title": "TraumaShadow.cs",
+              "DocumentMoniker": "C:\\Users\\maria\\source\\repos\\ejemplo1\\ONIKAGE\\Assets\\Scripts\\TraumaShadow.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\TraumaShadow.cs",
+              "ToolTip": "C:\\Users\\maria\\source\\repos\\ejemplo1\\ONIKAGE\\Assets\\Scripts\\TraumaShadow.cs",
+              "RelativeToolTip": "Assets\\Scripts\\TraumaShadow.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-05T20:45:57.952Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "FloatingText.cs",
+              "DocumentMoniker": "C:\\Users\\maria\\source\\repos\\ejemplo1\\ONIKAGE\\Assets\\Scripts\\FloatingText.cs",
+              "RelativeDocumentMoniker": "Assets\\Scripts\\FloatingText.cs",
+              "ToolTip": "C:\\Users\\maria\\source\\repos\\ejemplo1\\ONIKAGE\\Assets\\Scripts\\FloatingText.cs",
+              "RelativeToolTip": "Assets\\Scripts\\FloatingText.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAEYAAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-12-05T10:37:03.275Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
               "Title": "IInteractable.cs",
               "DocumentMoniker": "C:\\Users\\maria\\source\\repos\\ejemplo1\\ONIKAGE\\Assets\\Scripts\\IInteractable.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\IInteractable.cs",
@@ -70,7 +104,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 5,
               "Title": "InteractionSystem.cs",
               "DocumentMoniker": "C:\\Users\\maria\\source\\repos\\ejemplo1\\ONIKAGE\\Assets\\Scripts\\InteractionSystem.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\InteractionSystem.cs",
@@ -82,7 +116,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": "Level2Manager.cs",
               "DocumentMoniker": "C:\\Users\\maria\\source\\repos\\ejemplo1\\ONIKAGE\\Assets\\Scripts\\Level2Manager.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Level2Manager.cs",
@@ -94,7 +128,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "MoralSystem.cs",
               "DocumentMoniker": "C:\\Users\\maria\\source\\repos\\ejemplo1\\ONIKAGE\\Assets\\Scripts\\MoralSystem.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\MoralSystem.cs",
@@ -106,20 +140,19 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 2,
               "Title": "PlayerController.cs",
               "DocumentMoniker": "C:\\Users\\maria\\source\\repos\\ejemplo1\\ONIKAGE\\Assets\\Scripts\\PlayerController.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\PlayerController.cs",
               "ToolTip": "C:\\Users\\maria\\source\\repos\\ejemplo1\\ONIKAGE\\Assets\\Scripts\\PlayerController.cs",
               "RelativeToolTip": "Assets\\Scripts\\PlayerController.cs",
-              "ViewState": "AgIAABYAAAAAAAAAAAAswB4AAAA+AAAAAAAAAA==",
+              "ViewState": "AgIAABYAAAAAAAAAAAAswB4AAAAxAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-11-30T06:24:40.305Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-11-30T06:24:40.305Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 7,
               "Title": "GameController.cs",
               "DocumentMoniker": "C:\\Users\\maria\\source\\repos\\ejemplo1\\ONIKAGE\\Assets\\Scripts\\GameController.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\GameController.cs",
@@ -131,7 +164,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 8,
               "Title": "Enemy.cs",
               "DocumentMoniker": "C:\\Users\\maria\\source\\repos\\ejemplo1\\ONIKAGE\\Assets\\Scripts\\Enemy.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\Enemy.cs",
@@ -143,7 +176,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 9,
               "Title": "DoorController.cs",
               "DocumentMoniker": "C:\\Users\\maria\\source\\repos\\ejemplo1\\ONIKAGE\\Assets\\Scripts\\DoorController.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\DoorController.cs",
@@ -155,7 +188,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 10,
               "Title": "DialogueManager.cs",
               "DocumentMoniker": "C:\\Users\\maria\\source\\repos\\ejemplo1\\ONIKAGE\\Assets\\Scripts\\DialogueManager.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\DialogueManager.cs",
@@ -167,7 +200,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 11,
               "Title": "CombatManager.cs",
               "DocumentMoniker": "C:\\Users\\maria\\source\\repos\\ejemplo1\\ONIKAGE\\Assets\\Scripts\\CombatManager.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\CombatManager.cs",
@@ -179,7 +212,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 12,
               "Title": "BreakableObstacle.cs",
               "DocumentMoniker": "C:\\Users\\maria\\source\\repos\\ejemplo1\\ONIKAGE\\Assets\\Scripts\\BreakableObstacle.cs",
               "RelativeDocumentMoniker": "Assets\\Scripts\\BreakableObstacle.cs",

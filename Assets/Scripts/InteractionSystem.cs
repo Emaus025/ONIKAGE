@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class InteractionSystem : MonoBehaviour
 {
-    [Header("Configuración Interacción")]
+    [Header("Configuraciï¿½n Interacciï¿½n")]
     public float interactionRange = 1f;
     public LayerMask interactableLayer;
 

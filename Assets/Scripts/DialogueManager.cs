@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
@@ -17,7 +17,11 @@ public class DialogueManager : MonoBehaviour
     public float typingSpeed = 0.05f;
     public KeyCode continueKey = KeyCode.Space;
 
+    // Evento cuando termina el diálogo
+    public System.Action OnDialogueFinished;
+
     private Queue<DialogueLine> dialogueQueue;
+    
     private bool isDialogueActive = false;
     private bool isTyping = false;
     private string currentSentence;
@@ -46,12 +50,31 @@ public class DialogueManager : MonoBehaviour
 
         if (dialoguePanel != null)
             dialoguePanel.SetActive(false);
+
+        // Verificación de seguridad
+        if (dialogueText == null)
+            Debug.LogError("¡ERROR CRÍTICO! No se ha asignado 'Dialogue Text' en el Inspector de DialogueManager. Los diálogos no funcionarán.");
+        if (dialoguePanel == null)
+            Debug.LogError("¡ADVERTENCIA! No se ha asignado 'Dialogue Panel' en el Inspector de DialogueManager.");
+    }
+
+    private void Start()
+    {
+        // Diagnóstico de inicio
+        Debug.Log($"[DialogueManager] Inicializado. Panel asignado: {(dialoguePanel != null ? "SÍ" : "NO")}. Texto asignado: {(dialogueText != null ? "SÍ" : "NO")}.");
+        
+        if (dialoguePanel == null || dialogueText == null)
+        {
+            Debug.LogError("⚠️ [ATENCIÓN] Faltan referencias en el DialogueManager. Arrastra el Panel y el Texto en el Inspector.");
+        }
     }
 
     private void Update()
     {
+        // Debug para ver si detecta la tecla
         if (isDialogueActive && Input.GetKeyDown(continueKey))
         {
+            Debug.Log("Tecla de continuación detectada");
             if (isTyping)
             {
                 CompleteSentence();
@@ -132,13 +155,21 @@ public class DialogueManager : MonoBehaviour
             speakerPortrait.sprite = line.portrait;
 
         // Escribir texto caracter por caracter
-        dialogueText.text = "";
-        currentSentence = line.message;
-
-        foreach (char letter in currentSentence.ToCharArray())
+        if (dialogueText != null)
         {
-            dialogueText.text += letter;
-            yield return new WaitForSeconds(typingSpeed);
+            dialogueText.text = "";
+            currentSentence = line.message;
+
+            foreach (char letter in currentSentence.ToCharArray())
+            {
+                dialogueText.text += letter;
+                yield return new WaitForSeconds(typingSpeed);
+            }
+        }
+        else
+        {
+            Debug.LogError("DialogueManager: 'Dialogue Text' es NULL. No se puede mostrar el texto.");
+            yield return new WaitForSeconds(0.5f); // Evitar bloqueo si falta la UI
         }
 
         isTyping = false;
@@ -147,7 +178,10 @@ public class DialogueManager : MonoBehaviour
     private void CompleteSentence()
     {
         StopAllCoroutines();
-        dialogueText.text = currentSentence;
+        if (dialogueText != null)
+        {
+            dialogueText.text = currentSentence;
+        }
         isTyping = false;
     }
 
@@ -159,11 +193,19 @@ public class DialogueManager : MonoBehaviour
             dialoguePanel.SetActive(false);
 
         Debug.Log("Diálogo terminado");
+        OnDialogueFinished?.Invoke();
     }
 
     public bool IsDialogueActive()
     {
         return isDialogueActive;
+    }
+
+    public void CloseDialoguePanel()
+    {
+        isDialogueActive = false;
+        if (dialoguePanel != null)
+            dialoguePanel.SetActive(false);
     }
 
     // Método rápido para diálogos del Nivel 2

@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
-public class UIHUD : MonoBehaviour
+public class HUD : MonoBehaviour
 {
     public PlayerController player;
     public CombatManager combat;
@@ -31,7 +31,12 @@ public class UIHUD : MonoBehaviour
             if (livesText != null) livesText.text = "Vidas: " + player.lives;
             if (levelText != null) levelText.text = "Nivel: " + player.level;
 
-            if (gameOverPanel != null) gameOverPanel.SetActive(!player.enabled);
+            // CORREGIDO: Solo activar Game Over si las vidas son 0, no solo si el script está desactivado
+            if (gameOverPanel != null) 
+            {
+                bool isDead = player.lives <= 0;
+                gameOverPanel.SetActive(isDead);
+            }
         }
 
         if (combat != null && furiaFill != null)

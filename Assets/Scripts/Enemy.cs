@@ -34,6 +34,7 @@ public class Enemy : MonoBehaviour, IInteractable
     private Vector2 patrolDirection;
     private float patrolTimer;
     private bool isAttacking = false;
+    private Coroutine knockbackRoutine;
 
     private void Start()
     {
@@ -279,21 +280,27 @@ public class Enemy : MonoBehaviour, IInteractable
 
     public void ApplyKnockback(Vector2 direction, float distance, float speed)
     {
-        StartCoroutine(KnockbackCoroutine(direction, distance, speed));
+        if (knockbackRoutine != null) StopCoroutine(knockbackRoutine);
+        knockbackRoutine = StartCoroutine(KnockbackCoroutine(direction, distance, speed));
     }
 
     private IEnumerator KnockbackCoroutine(Vector2 direction, float distance, float speed)
     {
         rb.linearVelocity = Vector2.zero;
-        Vector3 dir = ((Vector3)direction).normalized;
-        float remaining = distance;
-        while (remaining > 0f)
+        Vector2 dir = direction.normalized;
+        float travelled = 0f;
+        float maxTime = (distance / Mathf.Max(speed, 0.0001f)) + 0.15f;
+        float t = 0f;
+        while (travelled < distance && t < maxTime)
         {
-            float step = speed * Time.deltaTime;
-            transform.position += dir * step;
-            remaining -= step;
+            float currentSpeed = Mathf.Lerp(speed, 0f, travelled / distance);
+            Vector2 target = (Vector2)transform.position + dir * (currentSpeed * Time.deltaTime);
+            rb.MovePosition(target);
+            travelled += currentSpeed * Time.deltaTime;
+            t += Time.deltaTime;
             yield return null;
         }
+        knockbackRoutine = null;
     }
 
     private void Die()
@@ -316,6 +323,7 @@ public class Enemy : MonoBehaviour, IInteractable
         if (pc != null)
         {
             pc.GainExperience(5);
+            pc.AddKill(1);
         }
 
         // Desactivar colisiones

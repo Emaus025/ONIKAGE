@@ -157,9 +157,10 @@ public class CombatManager : MonoBehaviour
     private void CheckAttackHit()
     {
         if (enemyLayer == 0) Debug.LogWarning("CombatManager: 'enemyLayer' no configurado. Asigna la capa de enemigos en el inspector.");
-        Vector3 center = playerController != null ? playerController.transform.position : transform.position;
+        Vector2 facing = playerController != null && playerController.LastMoveDirection != Vector2.zero ? playerController.LastMoveDirection : Vector2.down;
+        Vector3 center = playerController != null ? playerController.transform.position + (Vector3)(facing * 0.5f) : transform.position;
         int mask = enemyLayer == 0 ? ~0 : enemyLayer;
-        Collider2D[] hits = Physics2D.OverlapCircleAll(center, 1.5f, mask);
+        Collider2D[] hits = Physics2D.OverlapCircleAll(center, 2.0f, mask);
 
         if (hits.Length == 0) Debug.LogWarning("CombatManager: ataque no impactó a ningún enemigo. Revisa 'Enemy Layer' y distancia.");
         foreach (Collider2D hit in hits)
@@ -181,8 +182,27 @@ public class CombatManager : MonoBehaviour
                     AddFuria(furiaGainPerHit);
                 }
             }
+            else
+            {
+                OrcBoss boss = hit.GetComponent<OrcBoss>();
+                if (boss == null) boss = hit.GetComponentInParent<OrcBoss>();
+                if (boss != null)
+                {
+                    boss.TakeDamage(10, currentMode);
+                    Vector2 dirB = (boss.transform.position - center).normalized;
+                    boss.ApplyKnockback(dirB, 1f, 10f);
 
-            // Tambi�n verificar obst�culos rompibles
+                    if (currentMode == CombatMode.Furia)
+                    {
+                        if (playerController != null) playerController.Heal(10);
+                    }
+                    else
+                    {
+                        AddFuria(furiaGainPerHit);
+                    }
+                }
+            }
+
             BreakableObstacle obstacle = hit.GetComponent<BreakableObstacle>();
             if (obstacle == null) obstacle = hit.GetComponentInParent<BreakableObstacle>();
             if (obstacle != null)

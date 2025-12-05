@@ -22,6 +22,9 @@ public class PlayerController : MonoBehaviour
     public int experience;
     public int level = 1;
     public int lives = 3;
+    public int killCount = 0;
+
+    public System.Action<int> OnKillCountChanged;
 
     [Header("Dash")]
     public float dashDistance = 1.5f;
@@ -29,8 +32,9 @@ public class PlayerController : MonoBehaviour
     public float invulnerabilityDuration = 0.3f;
     private bool isInvulnerable;
     public bool IsInvulnerable => isInvulnerable;
-
+    private Coroutine knockbackRoutine;
     private Animator animator;
+    private Rigidbody2D rb;
 
     public LayerMask solidObjectsLayer;
 
@@ -41,6 +45,7 @@ public class PlayerController : MonoBehaviour
         {
             Debug.LogWarning("PlayerController: no Animator component found on the player GameObject.");
         }
+        rb = GetComponent<Rigidbody2D>();
 
         combatSystem = GetComponent<CombatManager>();
         if (combatSystem == null) combatSystem = FindObjectOfType<CombatManager>();
@@ -87,10 +92,11 @@ public class PlayerController : MonoBehaviour
 
         while ((targetPos - transform.position).sqrMagnitude > Mathf.Epsilon)
         {
-            transform.position = Vector3.MoveTowards(transform.position, targetPos, moveSpeed * Time.deltaTime);
+            Vector2 next = Vector2.MoveTowards((Vector2)transform.position, (Vector2)targetPos, moveSpeed * Time.deltaTime);
+            if (rb != null) rb.MovePosition(next); else transform.position = next;
             yield return null;
         }
-        transform.position = targetPos;
+        if (rb != null) rb.MovePosition((Vector2)targetPos); else transform.position = targetPos;
         isMoving = false;
     }
 
@@ -161,6 +167,13 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    public void AddKill(int amount = 1)
+    {
+        if (amount <= 0) return;
+        killCount += amount;
+        OnKillCountChanged?.Invoke(killCount);
+    }
+
     private void UseSkill1()
     {
         if (combatSystem != null && combatSystem.currentMode == CombatManager.CombatMode.Furia)
@@ -221,26 +234,32 @@ public class PlayerController : MonoBehaviour
     public void ApplyKnockback(Vector2 direction, float distance, float speed)
     {
         if (!gameObject.activeInHierarchy) return;
-        StartCoroutine(KnockbackCoroutine(direction, distance, speed));
+        if (knockbackRoutine != null) StopCoroutine(knockbackRoutine);
+        knockbackRoutine = StartCoroutine(KnockbackCoroutine(direction, distance, speed));
     }
 
     private IEnumerator KnockbackCoroutine(Vector2 direction, float distance, float speed)
     {
-        Vector3 dir = ((Vector3)direction).normalized;
-        float remaining = distance;
-        while (remaining > 0f)
+        Vector2 dir = direction.normalized;
+        float travelled = 0f;
+        float maxTime = (distance / Mathf.Max(speed, 0.0001f)) + 0.15f;
+        float t = 0f;
+        while (travelled < distance && t < maxTime)
         {
-            Vector3 target = transform.position + dir * (speed * Time.deltaTime);
+            float currentSpeed = Mathf.Lerp(speed, 0f, travelled / distance);
+            Vector2 target = (Vector2)transform.position + dir * (currentSpeed * Time.deltaTime);
             if (isWalkable(target))
             {
-                transform.position = target;
-                remaining -= speed * Time.deltaTime;
+                if (rb != null) rb.MovePosition(target); else transform.position = target;
+                travelled += currentSpeed * Time.deltaTime;
             }
             else
             {
                 break;
             }
+            t += Time.deltaTime;
             yield return null;
         }
+        knockbackRoutine = null;
     }
 }

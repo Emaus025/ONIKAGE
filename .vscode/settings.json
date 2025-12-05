@@ -66,5 +66,5 @@
     "explorer.fileNesting.patterns": {
         "*.sln": "*.csproj"
     },
-    "dotnet.defaultSolution": "Onikage 1.0.sln"
+    "dotnet.defaultSolution": "ONIKAGE.sln"
 }

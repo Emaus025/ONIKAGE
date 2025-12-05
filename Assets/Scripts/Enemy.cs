@@ -33,6 +33,7 @@ public class Enemy : MonoBehaviour, IInteractable
     private bool isHurting = false;
     private Vector2 patrolDirection;
     private float patrolTimer;
+    private bool isAttacking = false;
 
     private void Start()
     {
@@ -182,9 +183,10 @@ public class Enemy : MonoBehaviour, IInteractable
             }
             else
             {
-                // Aquí iría la lógica de daño al jugador
-                // Por simplicidad, lo hacemos cada cierto tiempo
-                StartCoroutine(AttackPlayer());
+                if (!isAttacking)
+                {
+                    StartCoroutine(AttackPlayer());
+                }
             }
         }
     }
@@ -200,14 +202,20 @@ public class Enemy : MonoBehaviour, IInteractable
 
     private IEnumerator AttackPlayer()
     {
-        // Animación de ataque
+        isAttacking = true;
         if (animator != null)
             animator.SetTrigger("attack");
 
-        // Aquí aplicarías daño al jugador
-        Debug.Log("Espíritu Engañado ataca al jugador!");
+        var pc = player.GetComponent<PlayerController>();
+        if (pc != null && !pc.IsInvulnerable)
+        {
+            pc.TakeDamage(damage);
+            Vector2 dir = (pc.transform.position - transform.position).normalized;
+            pc.ApplyKnockback(dir, 1f, 10f);
+        }
 
         yield return new WaitForSeconds(1f);
+        isAttacking = false;
     }
 
     private void UpdateAnimations()
@@ -269,6 +277,25 @@ public class Enemy : MonoBehaviour, IInteractable
         isHurting = false;
     }
 
+    public void ApplyKnockback(Vector2 direction, float distance, float speed)
+    {
+        StartCoroutine(KnockbackCoroutine(direction, distance, speed));
+    }
+
+    private IEnumerator KnockbackCoroutine(Vector2 direction, float distance, float speed)
+    {
+        rb.linearVelocity = Vector2.zero;
+        Vector3 dir = ((Vector3)direction).normalized;
+        float remaining = distance;
+        while (remaining > 0f)
+        {
+            float step = speed * Time.deltaTime;
+            transform.position += dir * step;
+            remaining -= step;
+            yield return null;
+        }
+    }
+
     private void Die()
     {
         currentState = EnemyState.Dead;
@@ -285,6 +312,12 @@ public class Enemy : MonoBehaviour, IInteractable
             MoralSystem.Instance.AddSombra(sombraOnDefeat);
         }
 
+        var pc = GameObject.FindGameObjectWithTag("Player")?.GetComponent<PlayerController>();
+        if (pc != null)
+        {
+            pc.GainExperience(5);
+        }
+
         // Desactivar colisiones
         Collider2D collider = GetComponent<Collider2D>();
         if (collider != null)
@@ -292,6 +325,18 @@ public class Enemy : MonoBehaviour, IInteractable
 
         // Destruir después de animación
         Destroy(gameObject, 2f);
+
+        int alive = 0;
+        Enemy[] enemies = FindObjectsOfType<Enemy>();
+        for (int i = 0; i < enemies.Length; i++)
+        {
+            if (enemies[i] != null && enemies[i] != this && enemies[i].currentHealth > 0)
+                alive++;
+        }
+        if (alive == 0 && DialogueManager.Instance != null)
+        {
+            DialogueManager.Instance.ShowDialogue("Nivel Completado", "Has derrotado a todos los enemigos.");
+        }
 
         Debug.Log("Espíritu Engañado derrotado!");
     }

@@ -9,11 +9,26 @@ public class PlayerController : MonoBehaviour
     public CombatManager combatSystem;
     public InteractionSystem interactionSystem;
 
+    [Header("Movimiento")]
     public float moveSpeed = 3;
-
     private bool isMoving;
-
+    private bool isDashing;
     private Vector2 input;
+    public Vector2 LastMoveDirection { get; private set; }
+
+    [Header("Stats")]
+    public int maxHealth = 100;
+    public int currentHealth;
+    public int experience;
+    public int level = 1;
+    public int lives = 3;
+
+    [Header("Dash")]
+    public float dashDistance = 1.5f;
+    public float dashSpeed = 8f;
+    public float invulnerabilityDuration = 0.3f;
+    private bool isInvulnerable;
+    public bool IsInvulnerable => isInvulnerable;
 
     private Animator animator;
 
@@ -28,7 +43,11 @@ public class PlayerController : MonoBehaviour
         }
 
         combatSystem = GetComponent<CombatManager>();
+        if (combatSystem == null) combatSystem = FindObjectOfType<CombatManager>();
         interactionSystem = GetComponent<InteractionSystem>();
+
+        currentHealth = maxHealth;
+        LastMoveDirection = Vector2.down;
     }
 
     public void Update()
@@ -45,6 +64,8 @@ public class PlayerController : MonoBehaviour
                 animator.SetFloat("moveX", input.x);
                 animator.SetFloat("moveY", input.y);
 
+                LastMoveDirection = input.normalized;
+
                 var targetPos = transform.position;
                 targetPos.x += input.x;
                 targetPos.y += input.y;
@@ -52,6 +73,10 @@ public class PlayerController : MonoBehaviour
                     StartCoroutine(Move(targetPos));
             }
         }
+
+        if (Input.GetKeyDown(KeyCode.Alpha1)) UseSkill1();
+        if (Input.GetKeyDown(KeyCode.Alpha2)) UseSkill2();
+        if (Input.GetKeyDown(KeyCode.Alpha3)) UseSkill3();
 
         animator.SetBool("isMoving", isMoving);
     }
@@ -76,5 +101,146 @@ public class PlayerController : MonoBehaviour
             return false;
         }
         return true;
+    }
+
+    public void TakeDamage(int amount)
+    {
+        if (currentHealth <= 0) return;
+        currentHealth = Mathf.Max(currentHealth - amount, 0);
+        if (animator != null) animator.SetTrigger("hurt");
+        StartInvulnerability(invulnerabilityDuration);
+        if (currentHealth == 0)
+        {
+            LoseLife();
+        }
+    }
+
+    public void Heal(int amount)
+    {
+        if (amount <= 0) return;
+        currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+    }
+
+    private void LoseLife()
+    {
+        lives = Mathf.Max(lives - 1, 0);
+        if (lives > 0)
+        {
+            currentHealth = maxHealth;
+        }
+        else
+        {
+            if (DialogueManager.Instance != null)
+            {
+                DialogueManager.Instance.ShowDialogue("Game Over", "Has perdido todas tus vidas.");
+            }
+            enabled = false;
+        }
+    }
+
+    public void GainExperience(int amount)
+    {
+        experience += amount;
+        int threshold = level * 100;
+        if (experience >= threshold)
+        {
+            experience -= threshold;
+            LevelUp();
+        }
+    }
+
+    private void LevelUp()
+    {
+        level += 1;
+        maxHealth += 10;
+        currentHealth = maxHealth;
+        moveSpeed += 0.1f;
+        if (DialogueManager.Instance != null)
+        {
+            DialogueManager.Instance.ShowDialogue("Nivel Ganado", "Has subido al nivel " + level);
+        }
+    }
+
+    private void UseSkill1()
+    {
+        if (combatSystem != null && combatSystem.currentMode == CombatManager.CombatMode.Furia)
+        {
+            if (combatSystem.furiaMeter < combatSystem.furyCostSkill1) return;
+            combatSystem.ConsumeFuria(combatSystem.furyCostSkill1);
+        }
+        PerformSkillAttack(15, 1.8f);
+    }
+
+    private void UseSkill2()
+    {
+        if (combatSystem != null && combatSystem.currentMode == CombatManager.CombatMode.Furia)
+        {
+            if (combatSystem.furiaMeter < combatSystem.furyCostSkill2) return;
+            combatSystem.ConsumeFuria(combatSystem.furyCostSkill2);
+        }
+        PerformSkillAttack(25, 2.2f);
+    }
+
+    private void UseSkill3()
+    {
+        if (combatSystem != null && combatSystem.currentMode == CombatManager.CombatMode.Furia)
+        {
+            if (combatSystem.furiaMeter < combatSystem.furyCostSkill3) return;
+            combatSystem.ConsumeFuria(combatSystem.furyCostSkill3);
+        }
+        PerformSkillAttack(40, 2.5f);
+    }
+
+    private void PerformSkillAttack(int damage, float radius)
+    {
+        if (combatSystem == null) return;
+        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, radius, combatSystem.enemyLayer);
+        foreach (var hit in hits)
+        {
+            var enemy = hit.GetComponent<Enemy>();
+            if (enemy != null)
+            {
+                enemy.TakeDamage(damage, combatSystem.currentMode);
+            }
+        }
+    }
+
+    public void StartInvulnerability(float duration)
+    {
+        if (!gameObject.activeInHierarchy) return;
+        StartCoroutine(InvulnerabilityCoroutine(duration));
+    }
+
+    private IEnumerator InvulnerabilityCoroutine(float duration)
+    {
+        isInvulnerable = true;
+        yield return new WaitForSeconds(duration);
+        isInvulnerable = false;
+    }
+
+    public void ApplyKnockback(Vector2 direction, float distance, float speed)
+    {
+        if (!gameObject.activeInHierarchy) return;
+        StartCoroutine(KnockbackCoroutine(direction, distance, speed));
+    }
+
+    private IEnumerator KnockbackCoroutine(Vector2 direction, float distance, float speed)
+    {
+        Vector3 dir = ((Vector3)direction).normalized;
+        float remaining = distance;
+        while (remaining > 0f)
+        {
+            Vector3 target = transform.position + dir * (speed * Time.deltaTime);
+            if (isWalkable(target))
+            {
+                transform.position = target;
+                remaining -= speed * Time.deltaTime;
+            }
+            else
+            {
+                break;
+            }
+            yield return null;
+        }
     }
 }

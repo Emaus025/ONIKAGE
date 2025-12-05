@@ -5,12 +5,19 @@ public class CombatManager : MonoBehaviour
 {
     public enum CombatMode { Sombra, Furia }
 
-    [Header("Configuración Combate")]
+    [Header("Configuraciï¿½n Combate")]
     public CombatMode currentMode = CombatMode.Sombra;
     public float furiaMeter = 0f;
     public float maxFuria = 100f;
     public float furiaGainPerHit = 10f;
     public float attackCooldown = 0.5f;
+    public float dashDistance = 2f;
+    public float dashSpeed = 8f;
+
+    public float furyCostBasicAttack = 5f;
+    public float furyCostSkill1 = 10f;
+    public float furyCostSkill2 = 15f;
+    public float furyCostSkill3 = 20f;
 
     [Header("Referencias")]
     public Animator animator;
@@ -26,11 +33,28 @@ public class CombatManager : MonoBehaviour
 
     private void Start()
     {
-        playerController = GetComponent<PlayerController>();
-        animator = GetComponent<Animator>();
+        // No sobrescribas referencias del inspector: solo busca si estÃ¡n vacÃ­as
+        if (playerController == null)
+        {
+            playerController = GetComponent<PlayerController>();
+            if (playerController == null) playerController = GetComponentInParent<PlayerController>();
+            if (playerController == null) playerController = FindObjectOfType<PlayerController>();
+            if (playerController == null) Debug.LogWarning("CombatManager: no se encontrÃ³ PlayerController en este GameObject, su padre, ni en la escena.");
+        }
+
+        if (animator == null)
+        {
+            animator = GetComponent<Animator>();
+            if (animator == null) animator = GetComponentInChildren<Animator>();
+            if (animator == null && playerController != null) animator = playerController.GetComponent<Animator>();
+        }
+        if (animator == null)
+            Debug.LogWarning("CombatManager: no Animator encontrado; la animaciÃ³n de ataque no se reproducirÃ¡.");
 
         if (attackHitbox != null)
             attackHitbox.SetActive(false);
+        else
+            Debug.LogWarning("CombatManager: 'attackHitbox' no asignado; solo se usarÃ¡ OverlapCircle para daÃ±o.");
     }
 
     private void Update()
@@ -41,9 +65,10 @@ public class CombatManager : MonoBehaviour
 
     private void HandleCombatInput()
     {
-        // Click izquierdo - Ataque básico
-        if (Input.GetMouseButtonDown(0) && canAttack)
+        // Click izquierdo - Ataque bÃ¡sico (fallback tecla J para debug)
+        if ((Input.GetMouseButtonDown(0) || Input.GetKeyDown(KeyCode.J)) && canAttack)
         {
+            Debug.Log("Input ataque detectado");
             PerformBasicAttack();
         }
 
@@ -58,24 +83,36 @@ public class CombatManager : MonoBehaviour
     {
         if (!canAttack) return;
 
-        StartCoroutine(AttackCooldown());
+        if (currentMode == CombatMode.Furia && furiaMeter < furyCostBasicAttack)
+        {
+            Debug.Log("Furia insuficiente para ataque bÃ¡sico");
+            return;
+        }
 
-        // Animación de ataque
+        StartCoroutine(AttackCooldown());
+        StartCoroutine(DashForward());
+
+        if (currentMode == CombatMode.Furia)
+        {
+            ConsumeFuria(furyCostBasicAttack);
+        }
+
         if (animator != null)
         {
+            Vector2 dir = playerController != null && playerController.LastMoveDirection != Vector2.zero ? playerController.LastMoveDirection : Vector2.down;
+            animator.SetFloat("moveX", dir.x);
+            animator.SetFloat("moveY", dir.y);
             animator.SetTrigger("attack");
         }
 
-        // Activar hitbox temporal
         if (attackHitbox != null)
         {
             StartCoroutine(ShowAttackHitbox());
         }
 
-        // Detectar enemigos u obstáculos
         CheckAttackHit();
 
-        Debug.Log($"Ataque básico ejecutado en modo: {currentMode}");
+        Debug.Log($"Ataque bÃ¡sico ejecutado en modo: {currentMode}");
     }
 
     private IEnumerator ShowAttackHitbox()
@@ -83,6 +120,31 @@ public class CombatManager : MonoBehaviour
         attackHitbox.SetActive(true);
         yield return new WaitForSeconds(0.2f);
         attackHitbox.SetActive(false);
+    }
+
+    private IEnumerator DashForward()
+    {
+        if (playerController == null) yield break;
+        Vector2 dir = playerController.LastMoveDirection;
+        if (dir == Vector2.zero) dir = Vector2.down;
+        float remaining = dashDistance;
+        while (remaining > 0f)
+        {
+            float step = dashSpeed * Time.deltaTime;
+            playerController.transform.position += (Vector3)(dir * step);
+            remaining -= step;
+            yield return null;
+        }
+        playerController.StartInvulnerability(0.2f);
+    }
+
+    public void OnAttackHitFrame()
+    {
+        if (attackHitbox != null)
+        {
+            StartCoroutine(ShowAttackHitbox());
+        }
+        CheckAttackHit();
     }
 
     private IEnumerator AttackCooldown()
@@ -94,24 +156,35 @@ public class CombatManager : MonoBehaviour
 
     private void CheckAttackHit()
     {
-        Collider2D[] hits = Physics2D.OverlapCircleAll(transform.position, 1.5f, enemyLayer);
+        if (enemyLayer == 0) Debug.LogWarning("CombatManager: 'enemyLayer' no configurado. Asigna la capa de enemigos en el inspector.");
+        Vector3 center = playerController != null ? playerController.transform.position : transform.position;
+        int mask = enemyLayer == 0 ? ~0 : enemyLayer;
+        Collider2D[] hits = Physics2D.OverlapCircleAll(center, 1.5f, mask);
 
+        if (hits.Length == 0) Debug.LogWarning("CombatManager: ataque no impactÃ³ a ningÃºn enemigo. Revisa 'Enemy Layer' y distancia.");
         foreach (Collider2D hit in hits)
         {
             Enemy enemy = hit.GetComponent<Enemy>();
+            if (enemy == null) enemy = hit.GetComponentInParent<Enemy>();
             if (enemy != null)
             {
                 enemy.TakeDamage(10, currentMode);
+                Vector2 dir = (enemy.transform.position - center).normalized;
+                enemy.ApplyKnockback(dir, 1f, 10f);
 
-                // Ganar furia si está en modo Furia
                 if (currentMode == CombatMode.Furia)
+                {
+                    if (playerController != null) playerController.Heal(10);
+                }
+                else
                 {
                     AddFuria(furiaGainPerHit);
                 }
             }
 
-            // También verificar obstáculos rompibles
+            // Tambiï¿½n verificar obstï¿½culos rompibles
             BreakableObstacle obstacle = hit.GetComponent<BreakableObstacle>();
+            if (obstacle == null) obstacle = hit.GetComponentInParent<BreakableObstacle>();
             if (obstacle != null)
             {
                 obstacle.Break();
@@ -141,7 +214,7 @@ public class CombatManager : MonoBehaviour
         switch (currentMode)
         {
             case CombatMode.Sombra:
-                // Movimiento silencioso, detección reducida
+                // Movimiento silencioso, detecciï¿½n reducida
                 if (playerController != null)
                 {
                     playerController.moveSpeed = 3f;
@@ -149,7 +222,7 @@ public class CombatManager : MonoBehaviour
                 break;
 
             case CombatMode.Furia:
-                // Movimiento más rápido, más detectable
+                // Movimiento mï¿½s rï¿½pido, mï¿½s detectable
                 if (playerController != null)
                 {
                     playerController.moveSpeed = 4f;
